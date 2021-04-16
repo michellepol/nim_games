@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/media">
+        <file>images/bucket.png</file>
+        <file>images/heap.png</file>
+        <file>images/rock1.png</file>
+        <file>images/rock2.png</file>
+    </qresource>
+</RCC>
