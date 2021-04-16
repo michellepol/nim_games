@@ -68,7 +68,8 @@ private:
 
     bool player_turn_{false};
     bool restart_{false};
-    bool fst_turn_{false};
+    bool fst_player_turn_{false};
+    bool first_turn_{true};
     bool computer_{false};
 
     Heap* heap1_;

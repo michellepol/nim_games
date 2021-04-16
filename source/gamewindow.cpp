@@ -152,31 +152,46 @@ void GameWindow::OnStartPressed() {
 
 void GameWindow::OnTurnPressed() {
     Heap::used_id = -1;
-    if(!fst_turn_) {
+    if(fst_player_turn_) {
         player_label_->setText("Ход 1 игрока");
         turn_btn_->setDisabled(true);
-        fst_turn_ = true;
+        fst_player_turn_ = true;
     } else {
         player_label_->setText("Ход 2 игрока");
         turn_btn_->setDisabled(true);
-        fst_turn_ = false;
+        fst_player_turn_ = false;
     }
 }
 
 void GameWindow::CheckWinStatus() {
     if(heap1_->getCount() == 0 && heap2_->getCount() == 0) {
         std::string winner;
-        if(rounds_[current_round].last_stone_win && !fst_turn_) {
-            winner = "the second player";
-        } else if(rounds_[current_round].last_stone_win && fst_turn_){
-            winner = "the first player";
-        } else if(!rounds_[current_round].last_stone_win && fst_turn_) {
-            winner = "the second player";
-        } else if(!rounds_[current_round].last_stone_win && !fst_turn_) {
-            winner = "the first player";
+        if(!computer_) {
+            if(rounds_[current_round].last_stone_win && !fst_player_turn_) {
+                winner = "the second player";
+            } else if(rounds_[current_round].last_stone_win && fst_player_turn_){
+                winner = "the first player";
+            } else if(!rounds_[current_round].last_stone_win && fst_player_turn_) {
+                winner = "the second player";
+            } else if(!rounds_[current_round].last_stone_win && !fst_player_turn_) {
+                winner = "the first player";
+            } else {
+                winner = "some error occured";
+            }
         } else {
-            winner = "some error occured";
+            if(rounds_[current_round].last_stone_win && !fst_player_turn_) {
+                winner = "computer";
+            } else if(rounds_[current_round].last_stone_win && fst_player_turn_){
+                winner = "player";
+            } else if(!rounds_[current_round].last_stone_win && fst_player_turn_) {
+                winner = "computer";
+            } else if(!rounds_[current_round].last_stone_win && !fst_player_turn_) {
+                winner = "player";
+            } else {
+                winner = "some error occured";
+            }
         }
+
         winner_window_ = new WinnerWindow(QString::fromStdString(winner));
         winner_window_->show();
         fst_heap_->setDisabled(false);
@@ -193,7 +208,7 @@ void GameWindow::OnTurnComputerPressed() {
         turn_btn_->setDisabled(true);
     } else {
         ai_->make_move_ai();
-        player_turn_ = true;
+        player_turn_= true;
         OnTurnComputerPressed();
     }
 }
@@ -213,11 +228,11 @@ void GameWindow::Start() {
         if(current_round < 3) {
             start_btn_->setText("Следующий раунд");
             if(rounds_[current_round].start_player == 1 && !computer_) {
-                fst_turn_ = true;
+                fst_player_turn_ = true;
                 player_label_ ->setText("Ход 1 игрока");
             } else if(!computer_) {
                 player_label_ ->setText("Ход 2 игрока");
-                fst_turn_ = false;
+                fst_player_turn_ = false;
             }
             if(rounds_[current_round].start_player == 1 && computer_) {
                 player_turn_ = true;
@@ -241,7 +256,10 @@ void GameWindow::Start() {
 
         turn_btn_->setDisabled(true);
         start_btn_->setDisabled(true);
-        fst_turn_ = true;
+
+        if(computer_) {
+            OnTurnComputerPressed();
+        }
 }
 
 void GameWindow::OnInGameExitPressed() {
