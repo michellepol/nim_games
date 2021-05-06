@@ -18,8 +18,6 @@ class Heap : public QGraphicsObject
 {
     Q_OBJECT
 public:
-    static int used_id;
-
     explicit Heap() = default;
     explicit Heap(QGraphicsScene* scene,QPointF point,Bucket* bucket,int id);
     QRectF boundingRect() const override;
@@ -28,10 +26,7 @@ public:
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
     void setCount(int count);
-    int getWidth() {
-        return w;
-    }
-    int getHeigth() {
+    int getHeigth() const{
         return h;
     }
     int getCount() const {
@@ -46,6 +41,9 @@ public:
     void setButton(QPushButton* button) {
         turn_btn = button;
     }
+    void setUsed(bool value) {
+        used_ = value;
+    }
 signals:
     void ValueChanged();
 private:
@@ -54,6 +52,7 @@ private:
     QGraphicsTextItem* count_label;
     QPixmap image;
     Rock* rock;
+    bool used_;
     const Bucket* bucket_{nullptr}; //warning
     int grab_amount_{1};
     QGraphicsScene* scene_;

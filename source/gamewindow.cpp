@@ -52,12 +52,12 @@ void GameWindow::SetUpGameLogic() {
 
     int margin = 75;
 
-    QPointF point1 = QPointF(margin,graphics_view_->height() * 0.25 - 150);
+    QPointF point1 = QPointF(margin,graphics_view_->height() * 0.25 - (scene_->height() * 0.3)/2);
     heap1_ = new Heap(scene_,point1,bucket,0);
     heap1_->setPos(point1);
 
 
-    QPointF point2 = QPointF(graphics_view_->width() - margin - 300,graphics_view_->height() * 0.25 - 150);
+    QPointF point2 = QPointF(graphics_view_->width() - margin - heap1_->getWidth(),graphics_view_->height() * 0.25 - heap1_->getHeigth()/2);
     heap2_ = new Heap(scene_,point2,bucket,1);
     heap2_->setPos(point2);
 
@@ -118,14 +118,12 @@ void GameWindow::SetUpGameMenuButtons(QVBoxLayout* vbox){
     }
     vbox->addWidget(turn_btn_ ,1);
     SetUpInGameMenuPolicy(turn_btn_);
-    turn_btn_->setDisabled(true);
 
     if(!computer_) {
         player_label_ = new QLabel();
         SetUpInGameMenuPolicy(player_label_ );
         vbox->addWidget(player_label_,0,Qt::AlignCenter);
     }
-
 
     QPushButton* rules_btn = new QPushButton("Правила",this);
     vbox->addWidget(rules_btn,1);
@@ -151,15 +149,18 @@ void GameWindow::OnStartPressed() {
 }
 
 void GameWindow::OnTurnPressed() {
-    Heap::used_id = -1;
-    if(fst_player_turn_) {
-        player_label_->setText("Ход 1 игрока");
-        turn_btn_->setDisabled(true);
-        fst_player_turn_ = true;
-    } else {
+    if(player_number == 1) {
         player_label_->setText("Ход 2 игрока");
         turn_btn_->setDisabled(true);
-        fst_player_turn_ = false;
+        heap1_->setUsed(false);
+        heap2_->setUsed(false);
+        player_number = PLAYERS::PLAYER2;
+    } else {
+        player_label_->setText("Ход 1 игрока");
+        turn_btn_->setDisabled(true);
+        heap1_->setUsed(false);
+        heap2_->setUsed(false);
+        player_number = PLAYERS::PLAYER1;
     }
 }
 
@@ -167,48 +168,69 @@ void GameWindow::CheckWinStatus() {
     if(heap1_->getCount() == 0 && heap2_->getCount() == 0) {
         std::string winner;
         if(!computer_) {
-            if(rounds_[current_round].last_stone_win && !fst_player_turn_) {
-                winner = "the second player";
-            } else if(rounds_[current_round].last_stone_win && fst_player_turn_){
-                winner = "the first player";
-            } else if(!rounds_[current_round].last_stone_win && fst_player_turn_) {
-                winner = "the second player";
-            } else if(!rounds_[current_round].last_stone_win && !fst_player_turn_) {
-                winner = "the first player";
+            if(rounds_[current_round - 1].last_stone_win) {
+                winner = std::to_string(player_number) + " игрок";
+                stats.winners[current_round - 1] = player_number;
             } else {
-                winner = "some error occured";
+                if(player_number == PLAYERS::PLAYER1) {
+                    winner = "2 игрок";
+                    stats.winners[current_round - 1] = 2;
+                } else {
+                    winner = "1 игрок";
+                    stats.winners[current_round - 1] = 1;
+                }
             }
         } else {
-            if(rounds_[current_round].last_stone_win && !fst_player_turn_) {
+            if(rounds_[current_round - 1].last_stone_win && player_number == PLAYERS::COMPUTER) {
                 winner = "computer";
-            } else if(rounds_[current_round].last_stone_win && fst_player_turn_){
+                stats.winners[current_round - 1] = PLAYERS::COMPUTER;
+            } else if(rounds_[current_round - 1].last_stone_win && player_number == PLAYERS::HUMAN){
                 winner = "player";
-            } else if(!rounds_[current_round].last_stone_win && fst_player_turn_) {
+                stats.winners[current_round - 1] = PLAYERS::HUMAN;
+            } else if(!rounds_[current_round - 1].last_stone_win && player_number == PLAYERS::COMPUTER) {
                 winner = "computer";
-            } else if(!rounds_[current_round].last_stone_win && !fst_player_turn_) {
+                stats.winners[current_round - 1] = PLAYERS::COMPUTER;
+            } else if(!rounds_[current_round - 1].last_stone_win && player_number == PLAYERS::HUMAN) {
                 winner = "player";
+                stats.winners[current_round - 1] = PLAYERS::HUMAN;
             } else {
                 winner = "some error occured";
             }
         }
 
-        winner_window_ = new WinnerWindow(QString::fromStdString(winner));
-        winner_window_->show();
-        fst_heap_->setDisabled(false);
-        scnd_heap_->setDisabled(false);
-        start_btn_->setDisabled(false);
-        turn_btn_->setDisabled(true);
+        if(current_round == 0) {
+            fst_heap_->setDisabled(false);
+            scnd_heap_->setDisabled(false);
+            start_btn_->setDisabled(false);
+            turn_btn_->setDisabled(true);
+            stat_window_ = new StatWindow(stats);
+            stat_window_->show();
+        } else {
+            start_btn_->setDisabled(false);
+            turn_btn_->setDisabled(true);
+            winner_window_ = new WinnerWindow(QString::fromStdString(winner));
+            winner_window_->show();
+        }
+
+
     }
+        else {
+            turn_btn_->setDisabled(false);
+        }
+
 }
 
 void GameWindow::OnTurnComputerPressed() {
-    Heap::used_id = -1;
     if(player_turn_) {
         player_turn_ = false;
         turn_btn_->setDisabled(true);
+        heap1_->setUsed(false);
+        heap2_->setUsed(false);
     } else {
         ai_->make_move_ai();
         player_turn_= true;
+        heap1_->setUsed(false);
+        heap2_->setUsed(false);
         OnTurnComputerPressed();
     }
 }
@@ -221,6 +243,9 @@ void GameWindow::Start() {
         if(winner_window_) {
             winner_window_->close();
         }
+        if(stat_window_) {
+            stat_window_->close();
+        }
         if(current_round == -1) {
              SetUpGameLogic();
              current_round = 0;
@@ -228,33 +253,41 @@ void GameWindow::Start() {
         if(current_round < 3) {
             start_btn_->setText("Следующий раунд");
             if(rounds_[current_round].start_player == 1 && !computer_) {
-                fst_player_turn_ = true;
+                player_number = PLAYERS::PLAYER1;
                 player_label_ ->setText("Ход 1 игрока");
             } else if(!computer_) {
                 player_label_ ->setText("Ход 2 игрока");
-                fst_player_turn_ = false;
+                player_number = PLAYERS::PLAYER2;
             }
             if(rounds_[current_round].start_player == 1 && computer_) {
                 player_turn_ = true;
             } else {
                 player_turn_ = false;
             }
-            current_round++;
+                current_round++;
         } else {
+            if(rounds_[current_round].start_player == 1 && !computer_) {
+                player_number = PLAYERS::PLAYER1;
+                player_label_ ->setText("Ход 1 игрока");
+            } else if(!computer_) {
+                player_label_ ->setText("Ход 2 игрока");
+                player_number = PLAYERS::PLAYER2;
+            }
             start_btn_->setText("Перезапуск");
             current_round = 0;
             start_btn_->setDisabled(true);
         }
-        Heap::used_id = -1;
         //block game settings
         fst_heap_->setDisabled(true);
         scnd_heap_->setDisabled(true);
+        turn_btn_->setDisabled(true);
 
         //take info from game settings
         heap1_->setCount(fst_heap_->value());
         heap2_->setCount(scnd_heap_->value());
+        heap1_->setUsed(false);
+        heap2_->setUsed(false);
 
-        turn_btn_->setDisabled(true);
         start_btn_->setDisabled(true);
 
         if(computer_) {

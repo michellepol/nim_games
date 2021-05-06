@@ -5,13 +5,18 @@
 #include <QPainterPath>
 #include <QList>
 
-int Heap::used_id = -1;
-
 void Heap::setCount(int count) {
+    bool is_start = false;
+    if(count_ == 0) {
+        is_start = true;
+    }
     count_ = count;
     QString buffer = QString::fromStdString(std::to_string(count_));
     count_label->setPlainText(buffer);
-    emit ValueChanged();
+    if(!is_start) {
+        emit ValueChanged();
+    }
+
 }
 
 Heap::Heap(QGraphicsScene* scene,QPointF point,Bucket* bucket,int id) {
@@ -25,7 +30,7 @@ Heap::Heap(QGraphicsScene* scene,QPointF point,Bucket* bucket,int id) {
     }
     image.convertFromImage(img);
 
-    image = image.scaled(300,300,Qt::IgnoreAspectRatio);
+    image = image.scaled(scene_->width() * 0.25,scene->height() * 0.3,Qt::IgnoreAspectRatio);
 
     w = image.width();
     h = image.height();
@@ -64,10 +69,7 @@ void Heap::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
 
 void Heap::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    if(used_id < 0 && count_!=0) {
-        used_id = id_;
-    }
-    if(used_id == id_) {
+    if(!used_) {
         this->setCursor(QCursor(Qt::ClosedHandCursor));
         rock->show();
         this->setZValue(0);
@@ -97,7 +99,6 @@ void Heap::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 void Heap::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-    if(used_id == id_) {
         this->setCursor(QCursor(Qt::ArrowCursor));
 
         QPointF cursor_pos = mapToScene(event->pos());
@@ -106,10 +107,11 @@ void Heap::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
         int bucket_h = bucket_->boundingRect().height();
         int bucket_w = bucket_->boundingRect().width();
-        QRectF bucket_hit = QRectF(bucket_pos,QSize(bucket_w,bucket_h));
+        QRectF bucket_hitbox= QRectF(bucket_pos,QSize(bucket_w,bucket_h));
 
-        bool da = bucket_hit.contains(cursor_pos);
-        if(da) {
+        bool bucket_reached = bucket_hitbox.contains(cursor_pos);
+        if(bucket_reached && !used_) {
+            used_ = true;
             if(!turn_btn->isEnabled() && count_ - grab_amount_ >= 0) {
                 turn_btn->setDisabled(false);
             }
@@ -122,14 +124,6 @@ void Heap::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         } else {
             rock->hide();
         }
-    }
 
     return;
 }
-
-
-/*
- * запретить растягивать окно
- * пофиксить меню
-*/
-

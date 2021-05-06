@@ -3,7 +3,6 @@
 MenuWindow::MenuWindow(QStackedWidget* widgets)
 {
     widgets_ = widgets;
-    this->setFixedSize(1325,818);
     this->resize(1325,818);
 
     QWidget* set_up = this;

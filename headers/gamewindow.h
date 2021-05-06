@@ -5,6 +5,7 @@
 #include "headers/ai.h"
 #include "headers/ruleswindow.h"
 #include "headers/winnerwindow.h"
+#include "headers/statwindow.h"
 #include <QWidget>
 #include <QFrame>
 #include <QVBoxLayout>
@@ -55,22 +56,32 @@ private:
         int start_player{-1};
         bool last_stone_win{false};
     };
+
+    enum PLAYERS {
+        PLAYER1 = 1,
+        PLAYER2 = 2,
+        COMPUTER = 3,
+        HUMAN = 4
+    };
+
     std::array<RoundSettings,4> rounds_;
     int current_round{-1};
 
     WinnerWindow* winner_window_{nullptr};
     RulesWindow* rules_window_{nullptr};
+    StatWindow* stat_window_{nullptr};
+    StatEntry stats;
 
     QFont font_;
 
     int view_min_width_{1000};
-    int view_min_height_{800};
+    int view_min_height_{600};
 
     bool player_turn_{false};
     bool restart_{false};
-    bool fst_player_turn_{false};
-    bool first_turn_{true};
     bool computer_{false};
+
+    int player_number{0};
 
     Heap* heap1_;
     Heap* heap2_;

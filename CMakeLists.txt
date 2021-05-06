@@ -38,6 +38,7 @@ set(SOURCE
         source/ruleswindow.cpp
         source/winnerwindow.cpp
         source/ai.cpp
+        source/statwindow.cpp
         resources.qrc
 )
 
@@ -50,6 +51,7 @@ set(HEADERS
         headers/gamewindow.h
         headers/ruleswindow.h
         headers/winnerwindow.h
+        headers/statwindow.h
         headers/ai.h
 )
 
