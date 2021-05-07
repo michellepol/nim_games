@@ -82,6 +82,7 @@ private:
     bool computer_{false};
 
     int player_number{0};
+    int prev_player_number{0};
 
     Heap* heap1_;
     Heap* heap2_;

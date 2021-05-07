@@ -12,8 +12,9 @@ public:
         heap1_ = heap1;
         heap2_ = heap2;
     }
-    void make_move_ai();
+    void make_move_ai(bool flag);
 private:
+    void make_random_move();
     int NIM_sum();
     Heap* heap1_;
     Heap* heap2_;
