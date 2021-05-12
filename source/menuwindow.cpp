@@ -1,7 +1,8 @@
 #include "headers/menuwindow.h"
 
-MenuWindow::MenuWindow(QStackedWidget* widgets)
+MenuWindow::MenuWindow(QWidget* parent,QStackedWidget* widgets)
 {
+    parent_ = parent;
     widgets_ = widgets;
     this->resize(1325,818);
 
@@ -39,13 +40,13 @@ MenuWindow::MenuWindow(QStackedWidget* widgets)
 }
 
 void MenuWindow::OnHumanPressed() {
-    game_window_ = new GameWindow(widgets_, false);
+    game_window_ = new GameWindow(parent_,widgets_, false);
     widgets_->addWidget(game_window_);
     widgets_->setCurrentWidget(game_window_);
 }
 
 void MenuWindow::OnComputerPressed() {
-    game_window_ = new GameWindow(widgets_, true);
+    game_window_ = new GameWindow(parent_,widgets_, true);
     widgets_->addWidget(game_window_);
     widgets_->setCurrentWidget(game_window_);
 }

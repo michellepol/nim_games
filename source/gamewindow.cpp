@@ -4,11 +4,13 @@ void GameWindow::Interface() {
     font_ = QFont("Helvetica");
     font_.setPixelSize(24);
 
-    graphics_view_ = new QGraphicsView();
+
+
+    graphics_view_ = new QGraphicsView(parent_);
     graphics_view_->setRenderHint(QPainter::Antialiasing);    // Настраиваем рендер
     graphics_view_->setCacheMode(QGraphicsView::CacheBackground); // Кэш фона
     graphics_view_->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
-    graphics_view_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    graphics_view_->setSizePolicy(QSizePolicy::Maximum,QSizePolicy::Maximum);
     graphics_view_->setMinimumSize(QSize(view_min_width_,view_min_height_));
 
     QHBoxLayout* mainbox = new QHBoxLayout(this);
@@ -16,10 +18,13 @@ void GameWindow::Interface() {
 
     scene_ = new QGraphicsScene(this);   // Инициализируем графическую сцену
     scene_->setItemIndexMethod(QGraphicsScene::NoIndex); // настраиваем индексацию элементов
+
+    scene_->addItem(round_label_);
     scene_->setSceneRect(0,0,view_min_width_,view_min_height_); // Устанавливаем размер сцены
 
     graphics_view_->setScene(scene_);  // Устанавливаем графическую сцену в graphicsView
-    mainbox->addWidget(graphics_view_,1,Qt::AlignLeft);
+
+    mainbox->addWidget(graphics_view_,1);
 
     SetUpGameMenuButtons(vbox);
     SetUpGameSettings(vbox);
@@ -27,11 +32,13 @@ void GameWindow::Interface() {
     mainbox->addLayout(vbox);
 }
 
-GameWindow::GameWindow(QStackedWidget* widgets,bool computer)
+GameWindow::GameWindow(QWidget* parent,QStackedWidget* widgets,bool computer)
 {
+    parent_ = parent;
     computer_ = computer;
     widgets_ = widgets;
     rules_window_ = new RulesWindow();
+    round_label_ = new QGraphicsTextItem();
 
     rounds_[0] = (RoundSettings{1,false});
     rounds_[1] = (RoundSettings{1,true});
@@ -116,6 +123,7 @@ void GameWindow::SetUpGameMenuButtons(QVBoxLayout* vbox){
         turn_btn_ = new QPushButton("Сменить ход",this);
         connect(turn_btn_,&QPushButton::clicked, this, &GameWindow::OnTurnPressed);
     }
+
     vbox->addWidget(turn_btn_ ,1);
     SetUpInGameMenuPolicy(turn_btn_);
 
@@ -142,6 +150,7 @@ void GameWindow::SetUpGameMenuButtons(QVBoxLayout* vbox){
 void GameWindow::SetUpInGameMenuPolicy(QWidget *btn) {
     btn->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Expanding);
     btn->setFont(font_);
+    //btn->setMaximumSize(QSize(200,200));
 }
 
 void GameWindow::OnStartPressed() {
@@ -164,10 +173,30 @@ void GameWindow::OnTurnPressed() {
     }
 }
 
+
+void GameWindow::SetRounds(int curr_round) {
+    if(curr_round == -1 || curr_round == 4) {
+        round_label_->setPlainText("Раунд 1. Первый ход за 1 игроком. Проигрывает последний взявший камень");
+    }
+    else if(curr_round == 1) {
+        round_label_->setPlainText("Раунд 2. Первый ход за 1 игроком. Выигрывает последний взявший камень");
+    }
+    else if(curr_round == 2) {
+        round_label_->setPlainText("Раунд 3. Первый ход за 2 игроком.  Проигрывает последний взявший камень");
+    }
+    else if(curr_round == 3) {
+        round_label_->setPlainText("Раунд 4. Первый ход за 2 игроком.  Выигрывает последний взявший камень");
+    }
+}
+
 void GameWindow::CheckWinStatus() {
     if(heap1_->getCount() == 0 && heap2_->getCount() == 0) {
         std::string winner;
+
         if(!computer_) {
+            if(player_number == 3) {
+                player_number = 2;
+            }
             if(rounds_[current_round - 1].last_stone_win) {
                 winner = std::to_string(player_number) + " игрок";
                 if(current_round != 0) {
@@ -248,6 +277,9 @@ void GameWindow::OnRulesPressed() {
 }
 
 void GameWindow::Start() {
+
+        SetRounds(current_round);
+
         if(winner_window_) {
             winner_window_->close();
         }
@@ -270,11 +302,16 @@ void GameWindow::Start() {
                 player_label_ ->setText("Ход 2 игрока");
                 player_number = PLAYERS::PLAYER2;
             }
+
+
+
             if(rounds_[current_round].start_player == 1 && computer_) {
                 player_number = PLAYERS::HUMAN;
-            } else {
+            } else if(computer_){
                 player_number = PLAYERS::COMPUTER;
             }
+
+
                 current_round++;
         } else {
             if(rounds_[current_round].start_player == 1 && !computer_) {

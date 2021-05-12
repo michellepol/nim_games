@@ -21,7 +21,7 @@ class GameWindow : public QWidget
     Q_OBJECT
 public:
     explicit GameWindow() = default;
-    explicit GameWindow(QStackedWidget* widgets,bool computer);
+    explicit GameWindow(QWidget* parent,QStackedWidget* widgets,bool computer);
     ~GameWindow() {
         delete rules_window_;
         delete winner_window_;
@@ -33,10 +33,10 @@ public:
         delete graphics_view_;
         delete fst_heap_;
         delete scnd_heap_;
-        delete widgets_;
         delete player_label_;
         delete ai_;
     }
+    void SetRounds(int curr_round);
     void Interface();
     void SetUpInGameMenuPolicy(QWidget* btn);
     void SetUpGameMenuButtons(QVBoxLayout* vbox);
@@ -72,10 +72,12 @@ private:
     StatWindow* stat_window_{nullptr};
     StatEntry stats;
 
+    QGraphicsTextItem* round_label_;
+
     QFont font_;
 
-    int view_min_width_{1000};
-    int view_min_height_{600};
+    int view_min_width_{600};
+    int view_min_height_{400};
 
     bool player_turn_{false};
     bool restart_{false};
@@ -97,6 +99,8 @@ private:
     QSpinBox* scnd_heap_;
     QStackedWidget* widgets_;
     QLabel* player_label_;
+
+    QWidget* parent_;
 
     AI* ai_;
 };

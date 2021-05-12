@@ -13,13 +13,14 @@ class MenuWindow : public QWidget
 {
 public:
     explicit MenuWindow() = default;
-    explicit MenuWindow(QStackedWidget* widgets);
+    explicit MenuWindow(QWidget* parent,QStackedWidget* widgets);
     void SetUpMenuScene();
 public slots:
     void OnHumanPressed();
     void OnComputerPressed();
     void OnExitPressed();
 private:
+    QWidget* parent_;
     QStackedWidget* widgets_;
     GameWindow* game_window_;
 };
