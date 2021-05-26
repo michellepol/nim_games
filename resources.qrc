@@ -4,5 +4,6 @@
         <file>images/heap.png</file>
         <file>images/rock1.png</file>
         <file>images/rock2.png</file>
+        <file>images/human.jpg</file>
     </qresource>
 </RCC>

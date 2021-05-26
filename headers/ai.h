@@ -14,6 +14,7 @@ public:
     }
     void make_move_ai(bool flag);
 private:
+    void send_message(int heap1_before_move,int heap2_before_move);
     void make_random_move();
     int NIM_sum();
     Heap* heap1_;

@@ -4,14 +4,13 @@ void GameWindow::Interface() {
     font_ = QFont("Helvetica");
     font_.setPixelSize(24);
 
-
-
     graphics_view_ = new QGraphicsView(parent_);
     graphics_view_->setRenderHint(QPainter::Antialiasing);    // Настраиваем рендер
     graphics_view_->setCacheMode(QGraphicsView::CacheBackground); // Кэш фона
     graphics_view_->setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
-    graphics_view_->setSizePolicy(QSizePolicy::Maximum,QSizePolicy::Maximum);
+    graphics_view_->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
     graphics_view_->setMinimumSize(QSize(view_min_width_,view_min_height_));
+    graphics_view_->setMaximumSize(QSize(view_min_width_,view_min_height_));
 
     QHBoxLayout* mainbox = new QHBoxLayout(this);
     QVBoxLayout* vbox = new QVBoxLayout();
@@ -19,12 +18,11 @@ void GameWindow::Interface() {
     scene_ = new QGraphicsScene(this);   // Инициализируем графическую сцену
     scene_->setItemIndexMethod(QGraphicsScene::NoIndex); // настраиваем индексацию элементов
 
-    scene_->addItem(round_label_);
     scene_->setSceneRect(0,0,view_min_width_,view_min_height_); // Устанавливаем размер сцены
 
     graphics_view_->setScene(scene_);  // Устанавливаем графическую сцену в graphicsView
 
-    mainbox->addWidget(graphics_view_,1);
+    mainbox->addWidget(graphics_view_);
 
     SetUpGameMenuButtons(vbox);
     SetUpGameSettings(vbox);
@@ -34,11 +32,16 @@ void GameWindow::Interface() {
 
 GameWindow::GameWindow(QWidget* parent,QStackedWidget* widgets,bool computer)
 {
+    view_min_height_ = parent->maximumSize().height();
+    view_min_width_ = parent->maximumSize().width() * 0.7;
     parent_ = parent;
     computer_ = computer;
     widgets_ = widgets;
     rules_window_ = new RulesWindow();
     round_label_ = new QGraphicsTextItem();
+
+    this->setMinimumSize(this->maximumSize());
+    this->setMaximumSize(this->maximumSize());
 
     rounds_[0] = (RoundSettings{1,false});
     rounds_[1] = (RoundSettings{1,true});
@@ -82,13 +85,27 @@ void GameWindow::SetUpGameLogic() {
 }
 
 void GameWindow::SetUpGameSettings(QVBoxLayout* vbox) {
+
+    QPalette sample_palette;
+    sample_palette.setColor(QPalette::Window, Qt::white);
+    sample_palette.setColor(QPalette::WindowText, Qt::black);
+
+
     QLabel* game_settings = new QLabel();
+    game_settings->setAutoFillBackground(true);
+    game_settings->setStyleSheet("background-color: rgba(255, 255, 255, 98);");
+    game_settings->setPalette(sample_palette);
+
     game_settings->setText("Настройки");
     SetUpInGameMenuPolicy(game_settings);
     vbox->addWidget(game_settings);
 
     QLabel* fst_heap_label = new QLabel();
+
+    fst_heap_label->setAutoFillBackground(true);
+    fst_heap_label->setPalette(sample_palette);
     fst_heap_label->setText("1-ая куча");
+    fst_heap_label->setStyleSheet("background-color: rgba(255, 255, 255, 98);");
     SetUpInGameMenuPolicy(fst_heap_label);
     vbox->addWidget(fst_heap_label);
 
@@ -99,7 +116,10 @@ void GameWindow::SetUpGameSettings(QVBoxLayout* vbox) {
     vbox->addWidget(fst_heap_);
 
     QLabel* scnd_heap_label = new QLabel();
+    scnd_heap_label->setAutoFillBackground(true);
+    scnd_heap_label->setPalette(sample_palette);
     scnd_heap_label->setText("2-ая куча");
+    scnd_heap_label->setStyleSheet("background-color: rgba(255, 255, 255, 98);");
     SetUpInGameMenuPolicy(scnd_heap_label);
     vbox->addWidget(scnd_heap_label);
 
@@ -252,7 +272,6 @@ void GameWindow::CheckWinStatus() {
         else {
             turn_btn_->setDisabled(false);
         }
-
 }
 
 void GameWindow::OnTurnComputerPressed() {
@@ -344,6 +363,8 @@ void GameWindow::Start() {
         if(computer_) {
             stats.computer = true;
             OnTurnComputerPressed();
+        } else {
+            player_label_->setStyleSheet("background-color: rgba(255, 255, 255, 98);");
         }
 }
 

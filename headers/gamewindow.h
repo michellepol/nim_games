@@ -15,6 +15,7 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QStackedWidget>
+#include <QPalette>
 
 class GameWindow : public QWidget
 {
@@ -32,8 +33,7 @@ public:
         delete scene_;
         delete graphics_view_;
         delete fst_heap_;
-        delete scnd_heap_;
-        delete player_label_;
+        delete scnd_heap_;  
         delete ai_;
     }
     void SetRounds(int curr_round);

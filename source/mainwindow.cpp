@@ -5,11 +5,16 @@
 #include <QHBoxLayout>
 
 #include <QLabel>
+#include <QScreen>
 #include <QSpinBox>
 
 
 MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent) {
+        QScreen* screen = QGuiApplication::primaryScreen();
+        QRect screen_geometry = screen->geometry();
+        this->setMaximumSize(screen_geometry.width() - 100,screen_geometry.height() - 100);
+
         widgets_ = new QStackedWidget(this);
         menu_window_ = new MenuWindow(this,widgets_);
 
