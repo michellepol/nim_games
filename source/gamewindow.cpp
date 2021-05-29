@@ -20,6 +20,9 @@ void GameWindow::Interface() {
 
     scene_->setSceneRect(0,0,view_min_width_,view_min_height_); // Устанавливаем размер сцены
 
+    round_label_->setFont(font_);
+    scene_->addItem(round_label_);
+
     graphics_view_->setScene(scene_);  // Устанавливаем графическую сцену в graphicsView
 
     mainbox->addWidget(graphics_view_);
@@ -266,7 +269,6 @@ void GameWindow::CheckWinStatus() {
             winner_window_ = new WinnerWindow(QString::fromStdString(winner));
             winner_window_->show();
         }
-
 
     }
         else {
